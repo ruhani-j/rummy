@@ -1,6 +1,6 @@
 import random
 
-deck = ['A of ♣', # clubs
+deck = ['A of ♣',  # club
         '2 of ♣',
         '3 of ♣',
         '4 of ♣',
@@ -14,7 +14,7 @@ deck = ['A of ♣', # clubs
         'Q of ♣',
         'K of ♣',
 
-        'A of ♥', # hearts
+        'A of ♥',  # hearts
         '2 of ♥',
         '3 of ♥',
         '4 of ♥',
@@ -28,7 +28,7 @@ deck = ['A of ♣', # clubs
         'Q of ♥',
         'K of ♥',
 
-        'A of ♦', # diamonds
+        'A of ♦',  # diamonds
         '2 of ♦',
         '3 of ♦',
         '4 of ♦',
@@ -55,11 +55,24 @@ deck = ['A of ♣', # clubs
         'J of ♠',
         'Q of ♠',
         'K of ♠',
-        ] # end of deck
+        ] # end of deck list
 
 def shuffle(deck):
     random.shuffle(deck)
 
-print(shuffle(deck))
+def deal(deck):
+    player_hand = [] # create a new list containing the hand of the player
 
+    for i in range(10): # deal 10 cards for each player
+        card = deck.pop(0) # remove first element in deck list
+        player_hand.append(card) # add the element to the player's hand
+    return player_hand
 
+shuffle(deck) # shuffle the deck
+
+# deal each player a hand of cards
+computer_hand = deal(deck)
+player_hand = deal(deck)
+
+print(computer_hand)
+print(player_hand)
