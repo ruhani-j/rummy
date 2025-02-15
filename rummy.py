@@ -57,6 +57,9 @@ diamonds = [card for card in deck if card.suit == '♦']
 spades = [card for card in deck if card.suit == '♠']
 clubs = [card for card in deck if card.suit == '♣']
 
+# Create an empty list for the melds
+melds = []
+
 computer_score = 0
 player_score = 0
 
@@ -109,6 +112,57 @@ def draw_deck(deck, hand):
 def draw_discard(discard_pile, hand):
     card = discard_pile.pop(0)  # remove first element in discard pile
     hand.append(card)  # add element to the hand at play
+
+# meld: allows player to create two types of melds: runs and sets
+def meld(hand):
+    next_move = ""
+    while next_move.upper() != 'B':
+        print("A - create run")
+        print("B - create set")
+
+        choice = input("Enter type of meld: ")
+
+        if choice.upper() == 'A':
+            print("run")
+        elif choice.upper() == 'B':
+            # sets: same value, different rank
+            print("Pick 3 or more cards to meld (separate with spaces).")
+            print("1st card = 1, 2nd card = 2, ect...")
+            print("Ex: 1 2 3 (1st, 2nd, and 3rd cards)")
+
+            cards = input("Enter cards: ").split() # get string of cards
+
+            # convert the list to numbers
+            cards = list(map(int, cards))
+
+            # Check to see if the user entered a valid meld
+            valid = True
+            for i in range(len(cards) - 1):  # loop through chosen meld
+                if hand[cards[i + 1] - 1].rank == hand[cards[i] - 1].rank:  # verify the ranks are equal
+                    valid = True
+                else: # if not valid, break out of loop
+                    valid = False
+                    break
+
+            # Consequences of valid and invalid melds
+            if valid:
+                print("VALID MELD")
+                for i in range(len(cards)):
+                    melds.append(hand[cards[i] - 1]) # add meld to meld list
+                print("Updated melds: ", melds)
+            else:
+                print("ERROR: INVALID MELD")
+                print("Cannot add meld to existing melds")
+
+            # Choose next steps
+            print("What will be your next move?")
+            print("A - create another meld")
+            print("B - cancel meld (return to other options)")
+
+            next_move = input("Enter next move: ")
+
+        else:
+            print("Invalid input")
 
 # discard: allows player to discard a card
 def discard(discard_pile, hand):
@@ -180,16 +234,30 @@ def play_game():
         print("Your hand: ", player_hand)
 
         # ****** Meld/Layoff and Discard ****** #
-        print("A - Meld/Layoff")
-        print("B - Discard a card")
-
+        # changed MELD and LAYOFF to separate choices
         while True:
-            choice = input("Enter choice (A/B): ") # computer or user makes choice
-            if choice.upper() in ['A', 'B']:
-                break
-            print("Invalid input. Please enter 'A' or 'B'.")
+            # placed options inside the loop
+            print("A - Meld")
+            print("B - Layoff")
+            print("C - Discard a card")
 
-        print(discard_pile)
+            choice = input("Enter choice (A/B/C): ")
+
+            if choice.upper() == 'A': # changed this *CHANGE
+                meld(player_hand)
+            else:
+                print("Invalid input. Please enter 'A' or 'B' or 'C'.")
+
+        # print("A - Meld/Layoff")
+        # print("B - Discard a card")
+
+        # while True:
+        #    choice = input("Enter choice (A/B): ") # computer or user makes choice
+        #    if choice.upper() in ['A', 'B']:
+        #        break
+        #    print("Invalid input. Please enter 'A' or 'B'.")
+
+        # print(discard_pile)
 
     # ****** Win Detection ****** #
         if len(computer_hand) == 0 or len(player_hand) == 0:
