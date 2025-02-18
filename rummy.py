@@ -123,7 +123,31 @@ def meld(hand):
         choice = input("Enter type of meld: ")
 
         if choice.upper() == 'A':
-            print("run")
+            # runs: consecutive values, same rank
+            print("Pick 3 or more cards to meld (separate with spaces).")
+            print("1st card = 1, 2nd card = 2, ect...")
+            print("Your hand: ", hand)
+            print("Ex: 1 2 3 (1st, 2nd, and 3rd cards)")
+
+            cards = input("Enter cards: ").split()  # get string of cards
+
+            # convert the list to numbers
+            cards = list(map(int, cards))
+
+            # Check to see if the user entered a valid meld
+            valid = True
+            for i in range(len(cards) - 1):  # loop through chosen meld
+                if hand[cards[i + 1] - 1].suit == hand[cards[i] - 1].suit:  # verify the suits are equal
+                    if int(hand[cards[i + 1] - 1].rank) == 2 and hand[cards[i] - 1].rank == 'A':
+                        valid = True
+                    elif int(hand[cards[i + 1] - 1].rank) == int(hand[cards[i] - 1].rank) + 1:  # verify the ranks are consecutive
+                        valid = True
+                    else:
+                        valid = False
+                        break
+                else:  # if not valid, break out of loop
+                    valid = False
+                    break
         elif choice.upper() == 'B':
             # sets: same value, different rank
             print("Pick 3 or more cards to meld (separate with spaces).")
@@ -143,26 +167,69 @@ def meld(hand):
                 else: # if not valid, break out of loop
                     valid = False
                     break
-
-            # Consequences of valid and invalid melds
-            if valid:
-                print("VALID MELD")
-                for i in range(len(cards)):
-                    melds.append(hand[cards[i] - 1]) # add meld to meld list
-                print("Updated melds: ", melds)
-            else:
-                print("ERROR: INVALID MELD")
-                print("Cannot add meld to existing melds")
-
-            # Choose next steps
-            print("What will be your next move?")
-            print("A - create another meld")
-            print("B - cancel meld (return to other options)")
-
-            next_move = input("Enter next move: ")
-
         else:
             print("Invalid input")
+
+        # Consequences of valid and invalid melds
+        if valid:
+          print("VALID MELD")
+          for i in range(len(cards)):
+              melds.append(hand[cards[i] - 1]) # add meld to meld list
+              print("Updated melds: ", melds)
+        else:
+            print("ERROR: INVALID MELD")
+            print("Cannot add meld to existing melds")
+
+        # Choose next steps
+        print("What will be your next move?")
+        print("A - create another meld")
+        print("B - cancel meld (return to other options)")
+
+        next_move = input("Enter next move: ")
+
+
+# layoff: allows player to add to an existing meld
+def layoff(melds, hand):
+    print("Current melds: ", melds)
+    print("Which meld would you like to add to? ")
+    print("1st meld = 1, 2nd meld = 2, etc...")
+    meld_number = int(input("Enter meld number: "))
+
+    # ensure the selected meld exists
+    if meld_number < 1 or meld_number > len(melds) or meld_number.isdigit() == False:
+        print("Invalid meld number. Please try again.")
+        return
+
+    # select meld
+    selected_meld = melds[meld_number - 1]
+
+    print("Selected meld: ", selected_meld)
+
+    # ask player which card to lay off
+    print("Cards in your hand: ", hand)
+    card_choice = input("Choose a card to lay off (enter the card number): ")
+    print("1st card = 1, 2nd card = 2, etc...")
+    chosen_card = hand[int(card_choice) - 1]  # Get the selected card from the hand
+
+    # check if it is a valid meld
+    valid_layoff = False # set default to false
+
+    # if meld is a set
+    if isinstance(selected_meld[0], int):
+        if chosen_card.rank == selected_meld[0].rank:
+            valid_layoff = True
+    else: # run meld
+        if chosen_card.rank == selected_meld[0].rank - 1 or chosen_card.rank == selected_meld[-1].rank + 1:
+            valid_layoff = True
+
+    if valid_layoff:
+        print(f"Valid layoff! Adding {chosen_card} to the meld.")
+        selected_meld.append(chosen_card)
+        hand.remove(chosen_card)
+        print("Updated meld: ", selected_meld)
+        print("Updated hand: ", hand)
+    else:
+        print("Invalid layoff. The card cannot be added to this meld.")
 
 # discard: allows player to discard a card
 def discard(discard_pile, hand):
@@ -222,14 +289,12 @@ def play_game():
                 break
             print("Invalid input. Please enter 'A' or 'B'.")
 
-#         choice = input("Enter choice: ") # user makes choice
-#
-#         if choice.upper() == 'A':
-#             draw_deck(deck, player_hand)
-#         elif choice.upper() == 'B':
-#             draw_discard(discard_pile, player_hand)
-#         else:
-#             print("Invalid input.")
+        if choice.upper() == 'A':
+            draw_deck(deck, player_hand)
+        elif choice.upper() == 'B':
+            draw_discard(discard_pile, player_hand)
+        else:
+             print("Invalid input.")
 
         print("Your hand: ", player_hand)
 
@@ -243,21 +308,16 @@ def play_game():
 
             choice = input("Enter choice (A/B/C): ")
 
-            if choice.upper() == 'A': # changed this *CHANGE
+            if choice.upper() == 'A':
                 meld(player_hand)
+            elif choice.upper() == 'B':
+                layoff(melds, player_hand)
+            elif choice.upper() == 'C':
+                discard(discard_pile, player_hand)
             else:
                 print("Invalid input. Please enter 'A' or 'B' or 'C'.")
 
-        # print("A - Meld/Layoff")
-        # print("B - Discard a card")
-
-        # while True:
-        #    choice = input("Enter choice (A/B): ") # computer or user makes choice
-        #    if choice.upper() in ['A', 'B']:
-        #        break
-        #    print("Invalid input. Please enter 'A' or 'B'.")
-
-        # print(discard_pile)
+        print(discard_pile)
 
     # ****** Win Detection ****** #
         if len(computer_hand) == 0 or len(player_hand) == 0:
