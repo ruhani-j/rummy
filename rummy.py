@@ -81,15 +81,17 @@ def deal(deck):
 # sort: allows players to sort their hands for ease in viewing
 def sort(cards, by = "rank"):
 
-    rank_order = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "Jack", "Queen", "King", "Ace"]
-    suit_order = ["Clubs", "Diamonds", "Hearts", "Spades"]
+    rank_order = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
+    suit_order = ['♠', '♣', '♥', '♦']
 
     if by == "rank":
         # Sorting by rank
-        cards.sort(key=lambda card: rank_order.index(card.rank))
+        cards.sort(key=lambda card: rank_order.index(str(card.rank)))
+        print(cards)
     elif by == "suit":
         # Sorting by suit
-        cards.sort(key=lambda card: suit_order.index(card.suit))
+        cards.sort(key=lambda card: suit_order.index(str(card.suit)))
+        print(cards)
     else:
         raise ValueError("Invalid sorting critera. Use 'rank' or 'suit'.")
     return cards
@@ -183,7 +185,7 @@ def meld(hand):
         # Choose next steps
         print("What will be your next move?")
         print("A - create another meld")
-        print("B - cancel meld (return to other options)")
+        print("B - return to other options")
 
         next_move = input("Enter next move: ")
 
@@ -234,6 +236,7 @@ def layoff(melds, hand):
 # discard: allows player to discard a card
 def discard(discard_pile, hand):
     print("Which card would you like to discard?")
+    print(hand)
     print("1st card = 1, 2nd card = 2, etc...")
     card_number = int(input("Enter card number: "))
 
