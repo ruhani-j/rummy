@@ -185,7 +185,7 @@ def meld(hand):
         # Choose next steps
         print("What will be your next move?")
         print("A - create another meld")
-        print("B - return to other options")
+        print("B - cancel meld (return to other options)")
 
         next_move = input("Enter next move: ")
 
@@ -236,12 +236,135 @@ def layoff(melds, hand):
 # discard: allows player to discard a card
 def discard(discard_pile, hand):
     print("Which card would you like to discard?")
-    print(hand)
     print("1st card = 1, 2nd card = 2, etc...")
     card_number = int(input("Enter card number: "))
 
     discarded_card = hand.pop(card_number - 1) # remove chosen card from hand
     discard_pile.append(discarded_card)  # add discarded card to discard pile
+
+def computer_meld(hand):
+    #suits = ['♣', '♥', '♦', '♠']
+
+    # runs: consecutive ranks, same suit
+    potential_cards = []
+
+    for i in range(len(suits)):
+        current_suit = suits[i] # loop through all four suits
+        for j in range(len(hand)):
+            if hand[j].suit == current_suit:
+                potential_cards.append(hand[j]) # append matching suits to list
+
+        if len(potential_cards) >= 3: # a meld must be 3 or more cards
+            print(potential_cards)
+
+            potential_ranks = []
+
+            # find corresponding numerical value of characters
+            for x in range(len(potential_cards)):
+                if potential_cards[x].rank == 'A':
+                    potential_ranks.append(1)
+                elif potential_cards[x].rank == '2':
+                    potential_ranks.append(2)
+                elif potential_cards[x].rank == '3':
+                    potential_ranks.append(3)
+                elif potential_cards[x].rank == '4':
+                    potential_ranks.append(4)
+                elif potential_cards[x].rank == '5':
+                    potential_ranks.append(5)
+                elif potential_cards[x].rank == '6':
+                    potential_ranks.append(6)
+                elif potential_cards[x].rank == '7':
+                    potential_ranks.append(7)
+                elif potential_cards[x].rank == '8':
+                    potential_ranks.append(8)
+                elif potential_cards[x].rank == '9':
+                    potential_ranks.append(9)
+                elif potential_cards[x].rank == '10':
+                    potential_ranks.append(10)
+                elif potential_cards[x].rank == 'J':
+                    potential_ranks.append(11)
+                elif potential_cards[x].rank == 'Q':
+                    potential_ranks.append(12)
+                elif potential_cards[x].rank == 'K':
+                    potential_ranks.append(13)
+
+            print(potential_ranks) # unsorted
+
+            potential_ranks.sort()
+            print(potential_ranks) # sorted
+
+            consecutive_indexes = []
+            # check to see if there are 3 or more consecutive ranks
+            for x in range(len(potential_ranks) - 1):
+                if potential_ranks[x] == potential_ranks[x + 1] - 1:
+                    consecutive_indexes.append(x)
+                    consecutive_indexes.append(x + 1)
+                    print("Valid")
+                else:
+                    print("Invalid")
+                    consecutive_indexes = []
+
+            if len(consecutive_indexes) >= 3: # a meld must be three or more cards
+                print(consecutive_indexes)
+
+                # remove duplicates
+                indexes = []
+
+                for x in consecutive_indexes:
+                    if x not in indexes:
+                        indexes.append(x)
+                print(indexes)
+
+                # add verified cards to meld
+                for x in indexes:
+                    print(potential_ranks[x])
+                # use indexes to access indexes of cards in potential ranks list
+                # locate ranks in computer hand
+
+            potential_cards = []
+
+        else:
+            potential_cards = [] # empty the list
+
+    # sets: same rank, different suit
+    ranks = [] # created empty list to hold rank characters
+    for i in range(len(hand)):
+        ranks.append(hand[i].rank) # add rank characters to empty list
+    print(ranks)
+
+    # Do not compare the last two cards because a meld
+    # must be at least 3 cards (hence the 'len(ranks) - 2'
+    is_valid_meld = False
+    indexes = [] # a list for valid indexes
+    for i in range(len(ranks) - 2):
+        possible_meld = 1  # start with one card
+        possible_index = i # start with current index
+        print(f"For: {ranks[i]}\n")
+        for j in range(i + 1, len(ranks)):
+            if ranks[i] == ranks[j]:
+                print("{}. Match")
+                possible_meld += 1 # increase possible meld by 1
+                indexes.append(j)
+            else:
+                print("{}. Unmatch")
+
+        if possible_meld >= 3: # a meld must have at least 3 cards
+            print("Valid meld")
+
+            # add cards to meld list
+            indexes.insert(0, possible_index) # insert first card in 1st index position
+            print(indexes)
+            for i in indexes:
+                melds.append(hand[i]) # add each card from the meld to the meld list
+            print("Updated melds: ", melds)
+            for i in range(len(indexes)):
+                hand.pop(indexes[i] - i) # remove each card from computer hand
+            print("Updated hand: ", hand)
+
+        # after you have found a meld, stop looping through list
+
+        else:
+            indexes = []
 
 def start_turn(player_hand):
     user_input = input("Your turn: ")
