@@ -185,7 +185,7 @@ def meld(hand):
         # Choose next steps
         print("What will be your next move?")
         print("A - create another meld")
-        print("B - cancel meld (return to other options)")
+        print("B - return to other options")
 
         next_move = input("Enter next move: ")
 
@@ -236,6 +236,7 @@ def layoff(melds, hand):
 # discard: allows player to discard a card
 def discard(discard_pile, hand):
     print("Which card would you like to discard?")
+    print(hand)
     print("1st card = 1, 2nd card = 2, etc...")
     card_number = int(input("Enter card number: "))
 
@@ -366,11 +367,72 @@ def computer_meld(hand):
         else:
             indexes = []
 
+def computer_layoff(computer_hand, melds):
+    if not melds:  # check if melds list is empty
+        print("No existing melds to lay off on.")
+        return False
+
+    rank_order = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
+
+    for selected_meld in melds:
+        # ensure selected_meld is a list of cards
+        if not isinstance(selected_meld, list) or not selected_meld:
+            print(f"Error: Expected a list for meld, but got {type(selected_meld)}")
+            continue
+
+        for card in computer_hand[:]:  # Iterate over a copy to allow safe removal
+            valid_layoff = False
+
+            # Check if the meld is a set (all cards have the same rank)
+            if all(c.rank == selected_meld[0].rank for c in selected_meld):
+                if card.rank == selected_meld[0].rank:
+                    valid_layoff = True
+
+            # Check if the meld is a run (all cards have the same suit and are consecutive)
+            elif all(c.suit == selected_meld[0].suit for c in selected_meld):
+                card_rank_index = rank_order.index(card.rank)
+                first_rank_index = rank_order.index(selected_meld[0].rank)
+                last_rank_index = rank_order.index(selected_meld[-1].rank)
+
+                if card_rank_index == first_rank_index - 1 or card_rank_index == last_rank_index + 1:
+                    valid_layoff = True
+
+            # If a valid layoff is found, execute it
+            if valid_layoff:
+                print(f"Computer adds {card} to meld {selected_meld}")
+                selected_meld.append(card)
+
+                # Ensure correct order if it's a run
+                if all(c.suit == selected_meld[0].suit for c in selected_meld):
+                    selected_meld.sort(key=lambda x: rank_order.index(x.rank))
+
+                computer_hand.remove(card)
+                print("Updated meld:", selected_meld)
+                print("Updated computer hand:", computer_hand)
+                return True  # Successfully laid off a card
+
+    print("Computer could not lay off any card.")
+    return False
+
+
+import random
+# computer discard: allows the computer to discard a card
+def computer_discard(discard_pile, computer_hand):
+    if not computer_hand:
+        return  # prevents errors if hand is empty
+
+    random_index = random.randint(0, len(computer_hand) - 1)  # choose a random card
+    discarded_card = computer_hand.pop(random_index)  # remove chosen card from hand
+    discard_pile.append(discarded_card)  # add to discard pile
+
+    print(f"Computer discards {discarded_card}")
+
+
 def start_turn(player_hand):
     user_input = input("Your turn: ")
     if user_input == "":
-        #print(player_hand)
-        print()
+        print(player_hand)
+        #print()
     elif user_input.lower() == "instructions":
         print(instructions)
     elif user_input.lower() == "sort by rank":
@@ -379,6 +441,11 @@ def start_turn(player_hand):
         sort(player_hand, by="suit")
     elif user_input.lower() == "shuffle" or user_input.lower() == "shuffle deck":
         shuffle(deck)
+
+def computer_turn(computer_hand, melds, discard_pile):
+    computer_meld(computer_hand)
+    computer_layoff(computer_hand, melds)
+    computer_discard(discard_pile, computer_hand)
 
 def play_game():
 
@@ -440,6 +507,7 @@ def play_game():
                 layoff(melds, player_hand)
             elif choice.upper() == 'C':
                 discard(discard_pile, player_hand)
+                computer_turn(computer_hand, melds, discard_pile)
             else:
                 print("Invalid input. Please enter 'A' or 'B' or 'C'.")
 
