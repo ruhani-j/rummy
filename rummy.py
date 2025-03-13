@@ -44,18 +44,19 @@ ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
 
 # Create the deck
 deck = []
+def make_deck():
 
-# Generate the deck of 52 cards (Card objects)
-for suit in suits:
-    for rank in ranks:
-        card = Card(suit, rank)
-        deck.append(card)
+    # Generate the deck of 52 cards (Card objects)
+    for suit in suits:
+        for rank in ranks:
+            card = Card(suit, rank)
+            deck.append(card)
 
-# Make suits and ranks identifiable
-hearts = [card for card in deck if card.suit == '♥']
-diamonds = [card for card in deck if card.suit == '♦']
-spades = [card for card in deck if card.suit == '♠']
-clubs = [card for card in deck if card.suit == '♣']
+    # Make suits and ranks identifiable
+    hearts = [card for card in deck if card.suit == '♥']
+    diamonds = [card for card in deck if card.suit == '♦']
+    spades = [card for card in deck if card.suit == '♠']
+    clubs = [card for card in deck if card.suit == '♣']
 
 # Create an empty list for the melds
 melds = []
@@ -70,12 +71,16 @@ def shuffle(deck):
 
 # deal: deals the computer and player 10 cards each at the beginning of the game
 def deal(deck):
+
+    if len(deck) == 0:
+        make_deck()
+
     player_hand = [] # create a new list containing the hand of the player
 
     CARDS_PER_HAND = 10
 
     for i in range(CARDS_PER_HAND): # deal 10 cards for each player
-        card = deck.pop() # remove first element in deck list
+        card = deck.pop(0) # remove first element in deck list
         player_hand.append(card) # add the element to the player's hand
     return player_hand
 
@@ -122,7 +127,7 @@ def rank_to_value(rank):
 def create_discard_pile():
     discard_pile = []  # create a new list for the discard pile
 
-    card = deck.pop() # remove first element in deck list
+    card = deck.pop(0) # remove first element in deck list
     discard_pile.append(card)
 
     return discard_pile
@@ -134,8 +139,12 @@ def draw_deck(deck, hand):
 
 # draw_discard: draws a card from the discard pile
 def draw_discard(discard_pile, hand):
-    card = discard_pile.pop(0)  # remove first element in discard pile
-    hand.append(card)  # add element to the hand at play
+    # remove the top card (last element) from the discard pile
+    card = discard_pile.pop()
+    # add the card to the hand
+    hand.append(card)
+
+# meld function: allows player to create melds (runs or sets) from their hand.
 def meld(hand, melds):
     next_move = ""
     while next_move.upper() != 'B':
@@ -144,7 +153,7 @@ def meld(hand, melds):
 
         choice = input("Enter type of meld: ")
 
-        # default is false
+        # default validity is false
         valid = False
 
         if choice.upper() == 'A':
@@ -152,87 +161,108 @@ def meld(hand, melds):
             print("Pick 3 or more cards to meld (separate with spaces).")
             print("1st card = 1, 2nd card = 2, etc...")
             print("Ex: 1 2 3 (1st, 2nd, and 3rd cards)")
-            print("Your hand: ", hand)
+            print("Your hand:", hand)
 
-            cards = input("Enter cards: ").split()  # get string of cards
+            cards = input("Enter cards: ").split()  # get string of card indices
 
-            # convert the list to numbers
-            cards = list(map(int, cards))
-
-            # Check if all indices are valid
-            if any(card > len(hand) or card < 1 for card in cards):
-                print("ERROR: Invalid card index. Please select valid cards from your hand.")
+            # convert the list to numbers, added try/except block to catch non-integer input
+            try:
+                cards = list(map(int, cards))
+            except ValueError:
+                print("Error: please enter valid card numbers separated by spaces.")
                 continue
 
-            # Check to see if the user entered a valid meld
+            # check that at least 3 cards are selected, added this check
+            if len(cards) < 3:
+                print("Error: a meld must consist of at least 3 cards.")
+                continue
+
+            # check if all indices are valid
+            if any(card > len(hand) or card < 1 for card in cards):
+                print("Error: invalid card index. please select valid cards from your hand.")
+                continue
+
+            # check that the selected cards form a valid run:
             valid = True
-            for i in range(len(cards) - 1):  # loop through chosen meld
+            for i in range(len(cards) - 1):
                 current_card = hand[cards[i] - 1]
                 next_card = hand[cards[i + 1] - 1]
 
-                if current_card.suit == next_card.suit:  # verify the suits are equal
-                    # Handle Ace as both high and low
-                    if (current_card.rank == 'A' and next_card.rank == 'K') or \
+                if current_card.suit == next_card.suit:
+                    # handle ace as both high and low (ace-king case)
+                    if (current_card.rank == 'A' and next_card.rank == '2') or \
+                       (current_card.rank == '2' and next_card.rank == 'A') or \
+                       (current_card.rank == 'A' and next_card.rank == 'K') or \
                        (current_card.rank == 'K' and next_card.rank == 'A'):
-                        continue  # Ace-King case, loop around
-                    elif (int(next_card.rank) == int(current_card.rank) + 1):  # check for consecutive ranks
-                        continue  # valid sequence
+                        continue
+                    # check for consecutive rank values using the rank_to_value helper
+                    elif rank_to_value(next_card.rank) == rank_to_value(current_card.rank) + 1:
+                        continue
                     else:
                         valid = False
                         break
-                else:  # if suits do not match
+                else:
                     valid = False
                     break
 
         elif choice.upper() == 'B':
-            # sets: same value, different suits
+            # sets: same rank, different suits
             print("Pick 3 or more cards to meld (separate with spaces).")
             print("1st card = 1, 2nd card = 2, etc...")
             print("Ex: 1 2 3 (1st, 2nd, and 3rd cards)")
+            print("Your hand:", hand)
 
-            cards = input("Enter cards: ").split()  # get string of cards
+            cards = input("Enter cards: ").split()  # get string of card indices
 
-            # convert the list to numbers
-            cards = list(map(int, cards))
-
-            # Check if all indices are valid
-            if any(card > len(hand) or card < 1 for card in cards):
-                print("ERROR: Invalid card index. Please select valid cards from your hand.")
+            # convert the list to numbers, added try/except block to catch non-integer input
+            try:
+                cards = list(map(int, cards))
+            except ValueError:
+                print("Error: please enter valid card numbers separated by spaces.")
                 continue
 
-            # Check to see if the user entered a valid meld
+            # check that at least 3 cards are selected, added this check
+            if len(cards) < 3:
+                print("Error: a meld must consist of at least 3 cards.")
+                continue
+
+            # check if all indices are valid
+            if any(card > len(hand) or card < 1 for card in cards):
+                print("Error: invalid card index. please select valid cards from your hand.")
+                continue
+
+            # check that the selected cards form a valid set:
             valid = True
-            for i in range(len(cards) - 1):  # loop through chosen meld
-                if hand[cards[i + 1] - 1].rank == hand[cards[i] - 1].rank:  # verify the ranks are equal
-                    valid = True
-                else:  # if not valid, break out of loop
+            for i in range(len(cards) - 1):
+                if hand[cards[i + 1] - 1].rank != hand[cards[i] - 1].rank:
                     valid = False
                     break
         else:
             print("Invalid input")
+            continue  # back to the beginning of the loop
 
-        # Consequences of valid and invalid melds
+        # consequences of valid and invalid melds
         if valid:
-            print("VALID MELD")
-            # Adjust the cards list to ensure we're removing from the correct indices
-            # Remove the cards in reverse order to avoid affecting the indices
+            print("Valid meld")
+            new_meld = []  # create a new sublist to group the meld cards together
+            # remove the chosen cards from hand and add them to the new meld.
+            # removing in reverse order to avoid index shifting issues.
             for i in sorted(cards, reverse=True):
                 card_to_add = hand[i - 1]
-                melds.append(card_to_add)  # add meld to meld list
-                hand.remove(card_to_add)  # remove the card from the hand
-            print("Updated melds: ", melds)
-            print("Updated hand: ", hand)
+                new_meld.append(card_to_add)
+                hand.remove(card_to_add)
+            melds.append(new_meld)  # append the new meld (as a sublist) to the global melds list
+            print("Updated melds:", melds)
+            print("Updated hand:", hand)
         else:
-            print("ERROR: INVALID MELD")
+            print("Error: invalid meld")
             print("Cannot add meld to existing melds")
 
-        # Choose next steps
+        # choose next steps
         print("What will be your next move?")
         print("A - create another meld")
         print("B - return to other options")
-
         next_move = input("Enter next move: ")
-
 
 # layoff: allows player to add to an existing meld
 def layoff(melds, hand):
@@ -252,7 +282,7 @@ def layoff(melds, hand):
             print("Invalid input. Please enter a valid integer.")
 
     # ensure the selected meld exists
-    if meld_number < 1 or meld_number > len(melds) or meld_number.isdigit() == False:
+    if meld_number < 1 or meld_number > len(melds):
         print("Invalid meld number. Please try again.")
         return
 
@@ -304,6 +334,46 @@ def discard(discard_pile, hand):
 
     discarded_card = hand.pop(card_number - 1) # remove chosen card from hand
     discard_pile.append(discarded_card)  # add discarded card to discard pile
+
+def computer_draw(computer_hand, discard_pile, deck):
+    """
+    Decide whether the computer should draw from the discard pile or the deck.
+    The computer checks if the top card of the discard pile might help in forming a meld.
+    If it is "useful", it draws that card; otherwise, it draws from the deck.
+    """
+
+    def is_card_useful(card, hand):
+        """
+        Determine if a given card might be useful based on the computer's hand.
+        - Useful for a set if another card of the same rank exists.
+        - Useful for a run if there's a card of the same suit that is consecutive in rank.
+        """
+        # Check for set potential: same rank exists in hand.
+        for c in hand:
+            if c.rank == card.rank:
+                return True
+
+        # Check for run potential: same suit with consecutive ranks.
+        card_value = rank_to_value(card.rank)
+        for c in hand:
+            if c.suit == card.suit:
+                if abs(rank_to_value(c.rank) - card_value) == 1:
+                    return True
+        return False
+
+    # Check if discard pile is non-empty
+    if discard_pile:
+        # Assuming the top card is the last element in the discard_pile list.
+        top_card = discard_pile[-1]
+        if is_card_useful(top_card, computer_hand):
+            draw_discard(discard_pile, computer_hand)
+            print(f"Computer draws {top_card} from the discard pile.")
+            return
+
+    # Otherwise, draw from the deck.
+    draw_deck(deck, computer_hand)
+    print("Computer draws from the deck.")
+
 
 def computer_meld(hand):
     meld_created = False
@@ -385,16 +455,16 @@ def computer_meld(hand):
                 possible_meld += 1 # increase possible meld by 1
                 indexes.append(j)
 
-        if possible_meld >= 3: # a meld must have at least 3 cards
-            indexes.insert(0, possible_index) # insert first card in 1st index position
-            # **FIX**: Instead of creating separate melds for each card, create one meld from all indexes
+        if possible_meld >= 3:  # a meld must have at least 3 cards
+            indexes.insert(0, possible_index)  # insert first card in 1st index position
+            # instead of creating separate melds for each card, create one meld from all indexes
             set_meld = [hand[i] for i in indexes]
-            melds.append(set_meld)
+            melds.append(set_meld) #add to melds
             print("The computer created a new meld")
-            print("Updated melds: ", melds)
-            for i in range(len(indexes)):
-                hand.pop(indexes[i] - i) # remove each card from computer hand
-            #print("Updated computer hand: ", hand)
+            print("Updated melds: ", melds) #print updated melds
+            cards_to_remove = [hand[i] for i in sorted(indexes, reverse=True)] #get cards to remove
+            for card in cards_to_remove:
+                hand.remove(card) #remove each card from computer hand
             meld_created = True
 
         else:
@@ -457,18 +527,85 @@ def computer_layoff(computer_hand, melds):
     return False
 
 
-import random
-# computer discard: allows the computer to discard a card
-def computer_discard(discard_pile, computer_hand):
-    if not computer_hand:
-        return  # prevents errors if hand is empty
+# import random
+# # computer discard: allows the computer to discard a card
+# def computer_discard(discard_pile, computer_hand):
+#     if not computer_hand:
+#         return  # prevents errors if hand is empty
+#
+#     random_index = random.randint(0, len(computer_hand) - 1)  # choose a random card
+#     discarded_card = computer_hand.pop(random_index)  # remove chosen card from hand
+#     discard_pile.append(discarded_card)  # add to discard pile
+#
+#     print(f"Computer discards {discarded_card}")
 
-    random_index = random.randint(0, len(computer_hand) - 1)  # choose a random card
-    discarded_card = computer_hand.pop(random_index)  # remove chosen card from hand
-    discard_pile.append(discarded_card)  # add to discard pile
+def computer_discard(discard_pile, computer_hand, melds):
+    """
+    Computer discards a card based on a logical decision, prioritizing discarding cards
+    that do not contribute to potential melds.
+    """
+    if not computer_hand:
+        return  # Prevents errors if hand is empty
+
+    # 1. Analyze hand for potential melds
+    potential_melds = analyze_potential_melds(computer_hand, melds)
+
+    # 2. Score cards based on their contribution to potential melds
+    card_scores = {}
+    for card in computer_hand:
+        card_scores[card] = score_card(card, potential_melds)
+
+    # 3. Choose the card with the lowest score to discard
+    discarded_card = min(card_scores, key=card_scores.get)
+
+    # 4. Remove the card from the hand and add it to the discard pile
+    computer_hand.remove(discarded_card)
+    discard_pile.append(discarded_card)
 
     print(f"Computer discards {discarded_card}")
 
+def analyze_potential_melds(hand, current_melds):
+    """
+    Analyzes the hand to identify potential melds (runs or sets).
+    Returns a dictionary of potential melds.
+    """
+    potential_melds = {"runs": [], "sets": []}
+
+    # Analyze for potential runs
+    sorted_hand = sorted(hand, key=lambda card: rank_to_value(card.rank)) #helper function needed
+    for i in range(len(sorted_hand) - 2):
+        if sorted_hand[i].suit == sorted_hand[i + 1].suit == sorted_hand[i + 2].suit:
+            if rank_to_value(sorted_hand[i+1].rank) == rank_to_value(sorted_hand[i].rank)+1 and rank_to_value(sorted_hand[i+2].rank) == rank_to_value(sorted_hand[i+1].rank)+1:
+                potential_melds["runs"].append((sorted_hand[i], sorted_hand[i+1], sorted_hand[i+2]))
+    # Analyze for potential sets
+    for i in range(len(hand) - 2):
+        if hand[i].rank == hand[i + 1].rank == hand[i + 2].rank:
+            potential_melds["sets"].append((hand[i], hand[i + 1], hand[i + 2]))
+
+    return potential_melds
+
+def score_card(card, potential_melds):
+    """
+    Scores a card based on its contribution to potential melds.
+    Lower scores indicate a higher likelihood of discarding.
+    """
+    score = 0
+
+    # Check if the card is part of a potential run
+    for run in potential_melds["runs"]:
+        if card in run:
+            score += 1  # Increment score if card is in a potential run
+
+    # Check if the card is part of a potential set
+    for set_cards in potential_melds["sets"]:
+        if card in set_cards:
+            score += 1  # Increment score if card is in a potential set
+
+    # If the card is not part of any potential meld, give it a low score
+    if score == 0:
+        score = -1
+
+    return score
 
 def start_turn(player_hand):
     user_input = input("Your turn: ")
@@ -484,10 +621,11 @@ def start_turn(player_hand):
     elif user_input.lower() == "shuffle" or user_input.lower() == "shuffle deck":
         shuffle(deck)
 
-def computer_turn(computer_hand, melds, discard_pile):
+def computer_turn(computer_hand, melds, discard_pile, deck):
+    computer_draw(computer_hand, discard_pile, deck)
     computer_meld(computer_hand)
     computer_layoff(computer_hand, melds)
-    computer_discard(discard_pile, computer_hand)
+    computer_discard(discard_pile, computer_hand, melds)
 
 def play_game():
 
@@ -550,7 +688,7 @@ def play_game():
                 layoff(melds, player_hand)
             elif choice.upper() == 'C':
                 discard(discard_pile, player_hand)
-                computer_turn(computer_hand, melds, discard_pile)
+                computer_turn(computer_hand, melds, discard_pile, deck)
                 break
             else:
                 print("Invalid input. Please enter 'A' or 'B' or 'C'.")
@@ -562,10 +700,12 @@ def play_game():
             keep_playing = False
 
     if len(computer_hand) == 0:
-        print("You win! :)")
+        print("You lose :(")
+        global computer_score
         computer_score += len(player_hand)
     if len(player_hand) == 0:
-        print("You lose :(")
+        print("You win! :)")
+        global player_score
         player_score += len(computer_hand)
 
     # Print results
