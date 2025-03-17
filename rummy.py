@@ -249,7 +249,7 @@ def meld(hand, melds):
             # removing in reverse order to avoid index shifting issues.
             for i in sorted(cards, reverse=True):
                 card_to_add = hand[i - 1]
-                new_meld.append(card_to_add)
+                new_meld.insert(0, card_to_add)
                 hand.remove(card_to_add)
             melds.append(new_meld)  # append the new meld (as a sublist) to the global melds list
             print("Updated melds:", melds)
@@ -305,7 +305,7 @@ def layoff(melds, hand):
         if chosen_card.rank == selected_meld[0].rank:
             valid_layoff = True
     else: # run meld
-        if chosen_card.rank == selected_meld[0].rank - 1 or chosen_card.rank == selected_meld[-1].rank + 1:
+        if chosen_card.rank == rank_to_value(selected_meld[0].rank) - 1 or chosen_card.rank == rank_to_value(selected_meld[-1].rank) + 1:
             valid_layoff = True
 
     if valid_layoff:
@@ -610,7 +610,7 @@ def score_card(card, potential_melds):
 def start_turn(player_hand):
     user_input = input("Your turn: ")
     if user_input == "":
-        print(player_hand)
+        print("Your hand: ", player_hand) # ~~~~~~~~~~~~~~~~~~~~
         #print()
     elif user_input.lower() == "instructions":
         print(instructions)
@@ -630,6 +630,9 @@ def computer_turn(computer_hand, melds, discard_pile, deck):
 def play_game():
 
     # ***** Game Code ***** #
+    # create the deck
+    make_deck()
+
     # shuffle the deck
     shuffle(deck)
 
@@ -645,7 +648,7 @@ def play_game():
     #print("Deck: ", deck)
 
     #print("Computer hand: ", computer_hand)
-    print("Player hand: ", player_hand)
+    #print("Player hand: ", player_hand)
 
     # Game starts here
     keep_playing = True
@@ -653,7 +656,10 @@ def play_game():
         start_turn(player_hand)
         # ****** Drawing a card ****** #
         # choices for picking up a card
-        #print("Discard Pile: ", discard_pile[0])
+        # print deck and discard pile
+        #print("Deck: [{}]".format(deck[-1])
+        print("Discard Pile: [{}]".format(discard_pile[-1]))
+
         print("A - Draw from deck pile")
         print(f"B - Draw from discard pile (Pick up the {discard_pile[-1]})")
 
@@ -675,6 +681,9 @@ def play_game():
         # ****** Meld/Layoff and Discard ****** #
         # changed MELD and LAYOFF to separate choices
         while True:
+            # placed options inside the loop
+            print(f"Current melds: {melds}\n") # ~~~~~~~~~~~~~~
+
             # placed options inside the loop
             print("A - Meld")
             print("B - Layoff")
