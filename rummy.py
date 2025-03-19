@@ -266,7 +266,6 @@ def meld(hand, melds):
 
 # layoff: allows player to add to an existing meld
 def layoff(melds, hand):
-
     if len(melds) == 0:
         print("There are no existing melds to lay off on. Please try again")
         return
@@ -274,38 +273,48 @@ def layoff(melds, hand):
     print("Current melds: ", melds)
     print("Which meld would you like to add to? ")
     print("1st meld = 1, 2nd meld = 2, etc...")
+
     while True:
         try:
             meld_number = int(input("Enter meld number: "))
-            break  # Exit the loop if input is valid
+            if meld_number < 1 or meld_number > len(melds):
+                print("Invalid meld number. Please try again.")
+                continue
+            break
         except ValueError:
             print("Invalid input. Please enter a valid integer.")
 
-    # ensure the selected meld exists
-    if meld_number < 1 or meld_number > len(melds):
-        print("Invalid meld number. Please try again.")
-        return
-
     # select meld
     selected_meld = melds[meld_number - 1]
-
     print("Selected meld: ", selected_meld)
 
     # ask player which card to lay off
     print("Cards in your hand: ", hand)
     card_choice = input("Choose a card to lay off (enter the card number): ")
     print("1st card = 1, 2nd card = 2, etc...")
-    chosen_card = hand[int(card_choice) - 1]  # Get the selected card from the hand
 
-    # check if it is a valid meld
-    valid_layoff = False # set default to false
+    try:
+        chosen_card = hand[int(card_choice) - 1]  # Get the selected card from the hand
+    except (ValueError, IndexError):
+        print("Invalid choice. Please select a valid card number.")
+        return
 
-    # if meld is a set
-    if isinstance(selected_meld[0], int):
+    # check if it is a valid layoff
+    valid_layoff = False
+
+    # if meld is a set (same rank, different suits)
+    if all(card.rank == selected_meld[0].rank for card in selected_meld):
         if chosen_card.rank == selected_meld[0].rank:
             valid_layoff = True
-    else: # run meld
-        if chosen_card.rank == rank_to_value(selected_meld[0].rank) - 1 or chosen_card.rank == rank_to_value(selected_meld[-1].rank) + 1:
+
+    # if meld is a run (consecutive values, same suit)
+    if all(card.suit == selected_meld[0].suit for card in selected_meld):
+        first_card_rank = rank_to_value(selected_meld[0].rank)
+        last_card_rank = rank_to_value(selected_meld[-1].rank)
+        chosen_card_rank = rank_to_value(chosen_card.rank)
+
+        # Allow layoff to the start or end of a run
+        if chosen_card_rank == first_card_rank - 1 or chosen_card_rank == last_card_rank + 1:
             valid_layoff = True
 
     if valid_layoff:
@@ -656,8 +665,8 @@ def play_game():
         start_turn(player_hand)
         # ****** Drawing a card ****** #
         # choices for picking up a card
-        # print deck and discard pile
-        #print("Deck: [{}]".format(deck[-1])
+        # print discard pile (deck pile is hidden because deck is face down and unknown to the player
+        #print("Deck: [{}]".format(deck[-1]))
         print("Discard Pile: [{}]".format(discard_pile[-1]))
 
         print("A - Draw from deck pile")
@@ -724,4 +733,5 @@ def play_game():
 play_game()
 
 while input("Do you want to play again? (yes/no)") == "yes":
+    melds = []
     play_game()
