@@ -30,6 +30,7 @@ print(welcome)
 
 import random
 
+
 class Card():
     def __init__(self, suit, rank):
         self.suit = suit
@@ -38,14 +39,16 @@ class Card():
     def __repr__(self):
         return f"{self.rank} of {self.suit}"
 
+
 # Define suits and ranks
 suits = ['♣', '♥', '♦', '♠']  # Unicode symbols for suits
 ranks = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K']
 
 # Create the deck
 deck = []
-def make_deck():
 
+
+def make_deck():
     # Generate the deck of 52 cards (Card objects)
     for suit in suits:
         for rank in ranks:
@@ -58,36 +61,37 @@ def make_deck():
     spades = [card for card in deck if card.suit == '♠']
     clubs = [card for card in deck if card.suit == '♣']
 
+
 # Create an empty list for the melds
 melds = []
 
 computer_score = 0
 player_score = 0
 
+
 # ****** Functions and Descriptions ****** #
 # shuffle: shuffles the deck at the beginning of the game
 def shuffle(deck):
     random.shuffle(deck)
 
+
 # deal: deals the computer and player 10 cards each at the beginning of the game
 def deal(deck):
-
     if len(deck) == 0:
         make_deck()
 
-    player_hand = [] # create a new list containing the hand of the player
+    player_hand = []  # create a new list containing the hand of the player
 
     CARDS_PER_HAND = 10
 
-    for i in range(CARDS_PER_HAND): # deal 10 cards for each player
-        card = deck.pop(0) # remove first element in deck list
-        player_hand.append(card) # add the element to the player's hand
+    for i in range(CARDS_PER_HAND):  # deal 10 cards for each player
+        card = deck.pop(0)  # remove first element in deck list
+        player_hand.append(card)  # add the element to the player's hand
     return player_hand
 
 
 # sort: allows players to sort their hands for ease in viewing
-def sort(cards, by = "rank"):
-
+def sort(cards, by="rank"):
     rank_order = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
     suit_order = ['♠', '♣', '♥', '♦']
 
@@ -103,9 +107,9 @@ def sort(cards, by = "rank"):
         raise ValueError("Invalid sorting critera. Use 'rank' or 'suit'.")
     return cards
 
+
 # helper function
 def rank_to_value(rank):
-
     mapping = {
         'A': 1,
         '2': 2,
@@ -123,19 +127,22 @@ def rank_to_value(rank):
     }
     return mapping.get(rank, 0)
 
+
 # create_discard_pile: creates discard pile at the beginning of the game
 def create_discard_pile():
     discard_pile = []  # create a new list for the discard pile
 
-    card = deck.pop(0) # remove first element in deck list
+    card = deck.pop(0)  # remove first element in deck list
     discard_pile.append(card)
 
     return discard_pile
 
+
 # draw_deck: draws a card from the deck pile
 def draw_deck(deck, hand):
-    card = deck.pop(0) # remove first element in deck
-    hand.append(card) # add element to the hand at play
+    card = deck.pop(0)  # remove first element in deck
+    hand.append(card)  # add element to the hand at play
+
 
 # draw_discard: draws a card from the discard pile
 def draw_discard(discard_pile, hand):
@@ -144,10 +151,12 @@ def draw_discard(discard_pile, hand):
     # add the card to the hand
     hand.append(card)
 
+
 # meld function: allows player to create melds (runs or sets) from their hand.
 def meld(hand, melds):
     next_move = ""
     while next_move.upper() != 'B':
+        print("********** NEXT MOVE **********")
         print("A - create run")
         print("B - create set")
 
@@ -158,6 +167,7 @@ def meld(hand, melds):
 
         if choice.upper() == 'A':
             # runs: consecutive values, same suit
+            print("********** NEXT MOVE **********")
             print("Pick 3 or more cards to meld (separate with spaces).")
             print("1st card = 1, 2nd card = 2, etc...")
             print("Ex: 1 2 3 (1st, 2nd, and 3rd cards)")
@@ -182,6 +192,7 @@ def meld(hand, melds):
                 print("Error: invalid card index. please select valid cards from your hand.")
                 continue
 
+            # BIG CHANGES BELOW
             # check that the selected cards form a valid run:
             valid = True
             for i in range(len(cards) - 1):
@@ -191,9 +202,7 @@ def meld(hand, melds):
                 if current_card.suit == next_card.suit:
                     # handle ace as both high and low (ace-king case)
                     if (current_card.rank == 'A' and next_card.rank == '2') or \
-                       (current_card.rank == '2' and next_card.rank == 'A') or \
-                       (current_card.rank == 'A' and next_card.rank == 'K') or \
-                       (current_card.rank == 'K' and next_card.rank == 'A'):
+                            (current_card.rank == 'K' and next_card.rank == 'A'):
                         continue
                     # check for consecutive rank values using the rank_to_value helper
                     elif rank_to_value(next_card.rank) == rank_to_value(current_card.rank) + 1:
@@ -207,6 +216,7 @@ def meld(hand, melds):
 
         elif choice.upper() == 'B':
             # sets: same rank, different suits
+            print("********** NEXT MOVE **********")
             print("Pick 3 or more cards to meld (separate with spaces).")
             print("1st card = 1, 2nd card = 2, etc...")
             print("Ex: 1 2 3 (1st, 2nd, and 3rd cards)")
@@ -226,7 +236,7 @@ def meld(hand, melds):
                 print("Error: a meld must consist of at least 3 cards.")
                 continue
 
-            # check if all indices are valid
+            # check if all indexes are valid
             if any(card > len(hand) or card < 1 for card in cards):
                 print("Error: invalid card index. please select valid cards from your hand.")
                 continue
@@ -247,6 +257,7 @@ def meld(hand, melds):
             new_meld = []  # create a new sublist to group the meld cards together
             # remove the chosen cards from hand and add them to the new meld.
             # removing in reverse order to avoid index shifting issues.
+            # change
             for i in sorted(cards, reverse=True):
                 card_to_add = hand[i - 1]
                 new_meld.insert(0, card_to_add)
@@ -259,10 +270,12 @@ def meld(hand, melds):
             print("Cannot add meld to existing melds")
 
         # choose next steps
+        print("\n********** NEXT MOVE **********")
         print("What will be your next move?")
         print("A - create another meld")
         print("B - return to other options")
         next_move = input("Enter next move: ")
+
 
 # layoff: allows player to add to an existing meld
 def layoff(melds, hand):
@@ -270,6 +283,7 @@ def layoff(melds, hand):
         print("There are no existing melds to lay off on. Please try again")
         return
 
+    print("********** NEXT MOVE **********")
     print("Current melds: ", melds)
     print("Which meld would you like to add to? ")
     print("1st meld = 1, 2nd meld = 2, etc...")
@@ -289,6 +303,7 @@ def layoff(melds, hand):
     print("Selected meld: ", selected_meld)
 
     # ask player which card to lay off
+    print("********** NEXT MOVE **********")
     print("Cards in your hand: ", hand)
     card_choice = input("Choose a card to lay off (enter the card number): ")
     print("1st card = 1, 2nd card = 2, etc...")
@@ -326,8 +341,10 @@ def layoff(melds, hand):
     else:
         print("Invalid layoff. The card cannot be added to this meld.")
 
+
 # discard: allows player to discard a card
 def discard(discard_pile, hand):
+    print("********** NEXT MOVE **********")
     print("Which card would you like to discard?")
     print(hand)
     print("1st card = 1, 2nd card = 2, etc...")
@@ -341,8 +358,9 @@ def discard(discard_pile, hand):
         except ValueError:
             print("Invalid input. Please enter an integer.")
 
-    discarded_card = hand.pop(card_number - 1) # remove chosen card from hand
+    discarded_card = hand.pop(card_number - 1)  # remove chosen card from hand
     discard_pile.append(discarded_card)  # add discarded card to discard pile
+
 
 def computer_draw(computer_hand, discard_pile, deck):
     """
@@ -389,13 +407,13 @@ def computer_meld(hand):
     # ****** runs: consecutive ranks, same suit ******
     potential_cards = []
 
-    for i in range(len(suits)): # the suits are the following: ['♣', '♥', '♦', '♠']
-        current_suit = suits[i] # loop through all four suits
+    for i in range(len(suits)):  # the suits are the following: ['♣', '♥', '♦', '♠']
+        current_suit = suits[i]  # loop through all four suits
         for j in range(len(hand)):
             if hand[j].suit == current_suit:
-                potential_cards.append(hand[j]) # append matching suits to list
+                potential_cards.append(hand[j])  # append matching suits to list
 
-        if len(potential_cards) >= 3: # a meld must be 3 or more cards
+        if len(potential_cards) >= 3:  # a meld must be 3 or more cards
 
             unsorted_potential_ranks = []
 
@@ -419,7 +437,7 @@ def computer_meld(hand):
                     consecutive_indexes = []
                     is_valid_meld = False
 
-            if is_valid_meld: # a meld must be three or more cards
+            if is_valid_meld:  # a meld must be three or more cards
                 # remove duplicates
                 indexes = []
                 for x in consecutive_indexes:
@@ -439,41 +457,41 @@ def computer_meld(hand):
 
                 print("The computer created a new meld")
                 print("Updated melds: ", melds)
-                #print("Updated computer hand, ", hand)
+                # print("Updated computer hand, ", hand)
                 meld_created = True
 
-            potential_cards = [] # empty the potential cards list# if the
+            potential_cards = []  # empty the potential cards list# if the
 
-        else: # if there aren't more than 3 cards, a meld is not possible
-            potential_cards = [] # empty the list
+        else:  # if there aren't more than 3 cards, a meld is not possible
+            potential_cards = []  # empty the list
 
     # ****** sets: same rank, different suit ******
-    ranks = [] # created empty list to hold rank characters
+    ranks = []  # created empty list to hold rank characters
     for i in range(len(hand)):
-        ranks.append(hand[i].rank) # add rank characters to empty list
+        ranks.append(hand[i].rank)  # add rank characters to empty list
 
     # Do not compare the last two cards because a meld
     # must be at least 3 cards (hence the 'len(ranks) - 2'
     is_valid_meld = False
-    indexes = [] # a list for valid indexes
+    indexes = []  # a list for valid indexes
     for i in range(len(ranks) - 2):
         possible_meld = 1  # start with one card
-        possible_index = i # start with current index
+        possible_index = i  # start with current index
         for j in range(i + 1, len(ranks)):
             if ranks[i] == ranks[j]:
-                possible_meld += 1 # increase possible meld by 1
+                possible_meld += 1  # increase possible meld by 1
                 indexes.append(j)
 
         if possible_meld >= 3:  # a meld must have at least 3 cards
             indexes.insert(0, possible_index)  # insert first card in 1st index position
             # instead of creating separate melds for each card, create one meld from all indexes
             set_meld = [hand[i] for i in indexes]
-            melds.append(set_meld) #add to melds
+            melds.append(set_meld)  # add to melds
             print("The computer created a new meld")
-            print("Updated melds: ", melds) #print updated melds
-            cards_to_remove = [hand[i] for i in sorted(indexes, reverse=True)] #get cards to remove
+            print("Updated melds: ", melds)  # print updated melds
+            cards_to_remove = [hand[i] for i in sorted(indexes, reverse=True)]  # get cards to remove
             for card in cards_to_remove:
-                hand.remove(card) #remove each card from computer hand
+                hand.remove(card)  # remove each card from computer hand
             meld_created = True
 
         else:
@@ -481,6 +499,7 @@ def computer_meld(hand):
 
     if not meld_created:
         print("The computer does not want to create a new meld")
+
 
 def computer_layoff(computer_hand, melds):
     if not melds:  # check if melds list is empty
@@ -515,7 +534,8 @@ def computer_layoff(computer_hand, melds):
 
                 # Now check if the card fits before the first or after the last card
                 if card.suit == selected_meld[0].suit:  # Check if card suit matches
-                    if rank_order.index(card.rank) == rank_order.index(first_rank) - 1 or rank_order.index(card.rank) == rank_order.index(last_rank) + 1:
+                    if rank_order.index(card.rank) == rank_order.index(first_rank) - 1 or rank_order.index(
+                            card.rank) == rank_order.index(last_rank) + 1:
                         valid_layoff = True
 
             # If a valid layoff is found, execute it
@@ -529,7 +549,7 @@ def computer_layoff(computer_hand, melds):
 
                 computer_hand.remove(card)
                 print("Updated meld:", selected_meld)
-                #print("Updated computer hand:", computer_hand)
+                # print("Updated computer hand:", computer_hand)
                 return True  # Successfully laid off a card
 
     print("Computer could not lay off any card.")
@@ -573,6 +593,7 @@ def computer_discard(discard_pile, computer_hand, melds):
 
     print(f"Computer discards {discarded_card}")
 
+
 def analyze_potential_melds(hand, current_melds):
     """
     Analyzes the hand to identify potential melds (runs or sets).
@@ -581,17 +602,19 @@ def analyze_potential_melds(hand, current_melds):
     potential_melds = {"runs": [], "sets": []}
 
     # Analyze for potential runs
-    sorted_hand = sorted(hand, key=lambda card: rank_to_value(card.rank)) #helper function needed
+    sorted_hand = sorted(hand, key=lambda card: rank_to_value(card.rank))  # helper function needed
     for i in range(len(sorted_hand) - 2):
         if sorted_hand[i].suit == sorted_hand[i + 1].suit == sorted_hand[i + 2].suit:
-            if rank_to_value(sorted_hand[i+1].rank) == rank_to_value(sorted_hand[i].rank)+1 and rank_to_value(sorted_hand[i+2].rank) == rank_to_value(sorted_hand[i+1].rank)+1:
-                potential_melds["runs"].append((sorted_hand[i], sorted_hand[i+1], sorted_hand[i+2]))
+            if rank_to_value(sorted_hand[i + 1].rank) == rank_to_value(sorted_hand[i].rank) + 1 and rank_to_value(
+                    sorted_hand[i + 2].rank) == rank_to_value(sorted_hand[i + 1].rank) + 1:
+                potential_melds["runs"].append((sorted_hand[i], sorted_hand[i + 1], sorted_hand[i + 2]))
     # Analyze for potential sets
     for i in range(len(hand) - 2):
         if hand[i].rank == hand[i + 1].rank == hand[i + 2].rank:
             potential_melds["sets"].append((hand[i], hand[i + 1], hand[i + 2]))
 
     return potential_melds
+
 
 def score_card(card, potential_melds):
     """
@@ -616,11 +639,12 @@ def score_card(card, potential_melds):
 
     return score
 
+
 def start_turn(player_hand):
     user_input = input("Your turn: ")
     if user_input == "":
-        print("Your hand: ", player_hand) # ~~~~~~~~~~~~~~~~~~~~
-        #print()
+        print("Your hand: ", player_hand)  # ~~~~~~~~~~~~~~~~~~~~
+        # print()
     elif user_input.lower() == "instructions":
         print(instructions)
     elif user_input.lower() == "sort by rank":
@@ -630,14 +654,16 @@ def start_turn(player_hand):
     elif user_input.lower() == "shuffle" or user_input.lower() == "shuffle deck":
         shuffle(deck)
 
+
 def computer_turn(computer_hand, melds, discard_pile, deck):
+    print("\n********** COMPUTER'S TURN **********")
     computer_draw(computer_hand, discard_pile, deck)
     computer_meld(computer_hand)
     computer_layoff(computer_hand, melds)
     computer_discard(discard_pile, computer_hand, melds)
+    print() # blank space
 
 def play_game():
-
     # ***** Game Code ***** #
     # create the deck
     make_deck()
@@ -654,10 +680,10 @@ def play_game():
     print("Discard Pile: ", discard_pile)
 
     # print new deck
-    #print("Deck: ", deck)
+    # print("Deck: ", deck)
 
-    #print("Computer hand: ", computer_hand)
-    #print("Player hand: ", player_hand)
+    # print("Computer hand: ", computer_hand)
+    # print("Player hand: ", player_hand)
 
     # Game starts here
     keep_playing = True
@@ -666,14 +692,15 @@ def play_game():
         # ****** Drawing a card ****** #
         # choices for picking up a card
         # print discard pile (deck pile is hidden because deck is face down and unknown to the player
-        #print("Deck: [{}]".format(deck[-1]))
-        print("Discard Pile: [{}]".format(discard_pile[-1]))
+        # print("Deck: [{}]".format(deck[-1]))
+        print("Discard Pile: [{}]\n".format(discard_pile[-1]))
 
+        print("********** NEXT MOVE **********")
         print("A - Draw from deck pile")
-        print(f"B - Draw from discard pile (Pick up the {discard_pile[-1]})")
+        print(f"B - Draw from discard pile (Pick up the {discard_pile[-1]})\n")
 
         while True:
-            choice = input("Enter choice (A/B): ") # computer or user makes choice
+            choice = input("Enter choice (A/B): ")  # computer or user makes choice
             if choice.upper() in ['A', 'B']:
                 break
             print("Invalid input. Please enter 'A' or 'B'.")
@@ -683,7 +710,7 @@ def play_game():
         elif choice.upper() == 'B':
             draw_discard(discard_pile, player_hand)
         else:
-             print("Invalid input.")
+            print("Invalid input.")
 
         print("Your hand: ", player_hand)
 
@@ -691,9 +718,10 @@ def play_game():
         # changed MELD and LAYOFF to separate choices
         while True:
             # placed options inside the loop
-            print(f"Current melds: {melds}\n") # ~~~~~~~~~~~~~~
+            print(f"Current melds: {melds}\n")  # ~~~~~~~~~~~~~~
 
             # placed options inside the loop
+            print("********** NEXT MOVE **********")
             print("A - Meld")
             print("B - Layoff")
             print("C - Discard a card")
@@ -706,16 +734,23 @@ def play_game():
                 layoff(melds, player_hand)
             elif choice.upper() == 'C':
                 discard(discard_pile, player_hand)
+                # check to see if player won
+                if len(player_hand) == 0:
+                    keep_playing = False
+                    break
+
                 computer_turn(computer_hand, melds, discard_pile, deck)
+                # check to see if computer won
+                if len(computer_hand) == 0:
+                    keep_playing = False
+                    break
                 break
             else:
                 print("Invalid input. Please enter 'A' or 'B' or 'C'.")
 
-        #print(discard_pile)
-
-    # ****** Win Detection ****** #
-        if len(computer_hand) == 0 or len(player_hand) == 0:
-            keep_playing = False
+        # ****** Win Detection ****** #
+        #if len(computer_hand) == 0 or len(player_hand) == 0:
+            #keep_playing = False
 
     if len(computer_hand) == 0:
         print("You lose :(")
@@ -727,8 +762,10 @@ def play_game():
         player_score += len(computer_hand)
 
     # Print results
+    print("********** GAME RESULTS **********")
     print("Your Score: ", player_score)
     print("Computer Score: ", computer_score)
+
 
 play_game()
 
