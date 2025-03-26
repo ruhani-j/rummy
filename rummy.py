@@ -140,6 +140,8 @@ def create_discard_pile():
 
 # draw_deck: draws a card from the deck pile
 def draw_deck(deck, hand):
+    if len(deck) == 0:
+        make_deck()
     card = deck.pop(0)  # remove first element in deck
     hand.append(card)  # add element to the hand at play
 
@@ -280,7 +282,7 @@ def meld(hand, melds):
 # layoff: allows player to add to an existing meld
 def layoff(melds, hand):
     if len(melds) == 0:
-        print("There are no existing melds to lay off on. Please try again")
+        print("There are no existing melds to lay off on. Please try a different move.")
         return
 
     print("********** NEXT MOVE **********")
@@ -336,6 +338,7 @@ def layoff(melds, hand):
         print(f"Valid layoff! Adding {chosen_card} to the meld.")
         selected_meld.append(chosen_card)
         hand.remove(chosen_card)
+        sort(selected_meld, by="rank")
         print("Updated meld: ", selected_meld)
         print("Updated hand: ", hand)
     else:
@@ -696,6 +699,7 @@ def play_game():
         print("Discard Pile: [{}]\n".format(discard_pile[-1]))
 
         print("********** NEXT MOVE **********")
+        print("Your hand: ", player_hand)
         print("A - Draw from deck pile")
         print(f"B - Draw from discard pile (Pick up the {discard_pile[-1]})\n")
 
@@ -753,11 +757,11 @@ def play_game():
             #keep_playing = False
 
     if len(computer_hand) == 0:
-        print("You lose :(")
+        print("\nYou lose :(")
         global computer_score
         computer_score += len(player_hand)
     if len(player_hand) == 0:
-        print("You win! :)")
+        print("\nYou win! :)")
         global player_score
         player_score += len(computer_hand)
 
