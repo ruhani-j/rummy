@@ -136,10 +136,13 @@ def test_meld_invalid_inputs(inputs):
     assert len(melds) == 0
 
 
-@pytest.mark.parametrize("choice,hand", [
-    ("A", [card("♣", "2"), card("♣", "4"), card("♣", "6")]),
-    ("B", [card("♣", "2"), card("♥", "3"), card("♦", "4")]),
-])
+@pytest.mark.parametrize(
+    "choice,hand",
+    [
+        ("A", [card("♣", "2"), card("♣", "4"), card("♣", "6")]),
+        ("B", [card("♣", "2"), card("♥", "3"), card("♦", "4")]),
+    ],
+)
 def test_meld_valid_indexes_but_invalid_combination(choice, hand):
     with patch.object(builtins, "input", side_effect=[choice, "1 2 3", "B"]):
         rummy.meld(hand, [])
@@ -312,14 +315,17 @@ def test_play_game_player_win_and_menu_branches():
     computer_hand = [card("♣", "2")]
     player_hand = [card("♥", "3")]
     discard_pile = [card("♦", "4")]
-    with patch.object(rummy, "make_deck"), patch.object(rummy, "shuffle"), patch.object(
-        rummy, "deal", side_effect=[computer_hand, player_hand]
-    ), patch.object(rummy, "create_discard_pile", return_value=discard_pile), patch.object(
-        rummy, "start_turn"
-    ), patch.object(rummy, "draw_deck"), patch.object(rummy, "meld"), patch.object(
-        rummy, "layoff"
-    ), patch.object(rummy, "discard", side_effect=lambda pile, hand: hand.clear()), patch.object(
-        builtins, "input", side_effect=["X", "A", "A", "B", "C"]
+    with (
+        patch.object(rummy, "make_deck"),
+        patch.object(rummy, "shuffle"),
+        patch.object(rummy, "deal", side_effect=[computer_hand, player_hand]),
+        patch.object(rummy, "create_discard_pile", return_value=discard_pile),
+        patch.object(rummy, "start_turn"),
+        patch.object(rummy, "draw_deck"),
+        patch.object(rummy, "meld"),
+        patch.object(rummy, "layoff"),
+        patch.object(rummy, "discard", side_effect=lambda pile, hand: hand.clear()),
+        patch.object(builtins, "input", side_effect=["X", "A", "A", "B", "C"]),
     ):
         rummy.play_game()
     assert not player_hand
@@ -333,12 +339,16 @@ def test_play_game_computer_win():
     def computer_turn_ends_game(hand, meld_list, pile, stock):
         hand.clear()
 
-    with patch.object(rummy, "make_deck"), patch.object(rummy, "shuffle"), patch.object(
-        rummy, "deal", side_effect=[computer_hand, player_hand]
-    ), patch.object(rummy, "create_discard_pile", return_value=discard_pile), patch.object(
-        rummy, "start_turn"
-    ), patch.object(rummy, "draw_discard"), patch.object(rummy, "discard"), patch.object(
-        rummy, "computer_turn", side_effect=computer_turn_ends_game
-    ), patch.object(builtins, "input", side_effect=["B", "C"]):
+    with (
+        patch.object(rummy, "make_deck"),
+        patch.object(rummy, "shuffle"),
+        patch.object(rummy, "deal", side_effect=[computer_hand, player_hand]),
+        patch.object(rummy, "create_discard_pile", return_value=discard_pile),
+        patch.object(rummy, "start_turn"),
+        patch.object(rummy, "draw_discard"),
+        patch.object(rummy, "discard"),
+        patch.object(rummy, "computer_turn", side_effect=computer_turn_ends_game),
+        patch.object(builtins, "input", side_effect=["B", "C"]),
+    ):
         rummy.play_game()
     assert not computer_hand
